@@ -12,24 +12,84 @@ class _homePageState extends State<homePage> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        extendBody: true, // Extiende el cuerpo detrás de la barra de aplicación
-        body: Builder(
-          builder: (context) => SingleChildScrollView(
-            child: Column(
-              children: [
-                Container(
-                  color: Colors.white,
-                  height: MediaQuery.of(context).size.height * 1,
-                  width: MediaQuery.of(context).size.width * 1,
-                  child: Stack(
-                    children: [Container()],
-                  ),
-                )
-              ],
+        backgroundColor: Color.fromARGB(255, 255, 255, 255),
+        body: Center(
+          child: BreathingButton(),
+        ),
+      ),
+    );
+  }
+}
+
+class BreathingButton extends StatefulWidget {
+  @override
+  _BreathingButtonState createState() => _BreathingButtonState();
+}
+
+class _BreathingButtonState extends State<BreathingButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 1000),
+      reverseDuration: Duration(milliseconds: 1000),
+    );
+    _animationController.repeat(reverse: true);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animationController,
+      builder: (context, child) {
+        return Transform.scale(
+          scale: 1.0 + _animationController.value * 0.1,
+          child: child,
+        );
+      },
+      child: Container(
+        width: 150,
+        height: 150,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(100),
+          boxShadow: const [
+            BoxShadow(
+              color: Color.fromARGB(110, 172, 0, 224),
+              spreadRadius: 6,
+              blurRadius: 9,
+              offset: Offset(0, 0.5),
+            ),
+          ],
+        ),
+        child: ElevatedButton(
+          onPressed: () {
+            // Acción a realizar cuando se presione el botón
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Color(0xFF9F26C4),
+          ),
+          child: Text(
+            'Iniciar',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: MediaQuery.of(context).size.width * 0.06,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'QuickSand',
+              color: Color.fromARGB(255, 255, 255, 255),
             ),
           ),
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 }
