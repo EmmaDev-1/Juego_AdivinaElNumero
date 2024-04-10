@@ -1,3 +1,5 @@
+import 'package:adivina_el_numero_desafio/navegation/animations/slideToSide.dart';
+import 'package:adivina_el_numero_desafio/pages/game/gamePage.dart';
 import 'package:flutter/material.dart';
 
 class homePage extends StatefulWidget {
@@ -12,7 +14,7 @@ class _homePageState extends State<homePage> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        backgroundColor: Color.fromARGB(255, 255, 255, 255),
+        backgroundColor: Color.fromARGB(255, 0, 0, 0),
         body: Center(
           child: BreathingButton(),
         ),
@@ -52,8 +54,8 @@ class _BreathingButtonState extends State<BreathingButton>
         );
       },
       child: Container(
-        width: 150,
-        height: 150,
+        height: MediaQuery.of(context).size.height * 0.18,
+        width: MediaQuery.of(context).size.width * 0.4,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(100),
           boxShadow: const [
@@ -67,7 +69,10 @@ class _BreathingButtonState extends State<BreathingButton>
         ),
         child: ElevatedButton(
           onPressed: () {
-            // Acción a realizar cuando se presione el botón
+            Navigator.push(
+              context,
+              crearRuta(context, gamePage()),
+            );
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: Color(0xFF9F26C4),
@@ -76,7 +81,7 @@ class _BreathingButtonState extends State<BreathingButton>
             'Iniciar',
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: MediaQuery.of(context).size.width * 0.06,
+              fontSize: MediaQuery.of(context).size.width * 0.07,
               fontWeight: FontWeight.bold,
               fontFamily: 'QuickSand',
               color: Color.fromARGB(255, 255, 255, 255),
