@@ -14,7 +14,7 @@ class _homePageState extends State<homePage> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        backgroundColor: Color.fromARGB(255, 0, 0, 0),
+        backgroundColor: Color.fromARGB(255, 22, 22, 22),
         body: Center(
           child: BreathingButton(),
         ),

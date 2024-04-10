@@ -1,3 +1,4 @@
+import 'package:adivina_el_numero_desafio/models/game/gameModel.dart';
 import 'package:flutter/material.dart';
 
 class gamePage extends StatefulWidget {
@@ -12,6 +13,18 @@ class _gamePageState extends State<gamePage> {
   String dropdownValue = 'Fácil';
   Color containerColor = Colors.green;
   Color textColor = Colors.green;
+
+  //Controladores
+  final TextEditingController _textController = TextEditingController();
+
+  //Obtención de gameModel
+  LogicaJuego logicaJuego = LogicaJuego();
+
+  @override
+  void initState() {
+    super.initState();
+    logicaJuego.IniciarJuegoNuevo(dropdownValue);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +41,7 @@ class _gamePageState extends State<gamePage> {
                   child: Column(
                     children: [
                       headerContent(),
-                      gameTopContent(),
+                      gameTopContent(context),
                       gameMiddleContent(),
                       gameBottomContent(),
                     ],
@@ -73,7 +86,7 @@ class _gamePageState extends State<gamePage> {
     );
   }
 
-  gameTopContent() {
+  gameTopContent(BuildContext context) {
     return Container(
       margin: EdgeInsets.only(
         top: MediaQuery.of(context).size.height * 0.03,
@@ -83,24 +96,45 @@ class _gamePageState extends State<gamePage> {
         children: [
           Container(
             height: MediaQuery.of(context).size.height * 0.07,
-            width: MediaQuery.of(context).size.width * 0.55,
+            width: MediaQuery.of(context).size.width * 0.56,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
               color: Colors.grey[200],
             ),
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: TextField(
+              controller: _textController,
               style: TextStyle(
                 fontSize: MediaQuery.of(context).size.width * 0.04,
                 fontFamily: 'QuickSand',
                 fontWeight: FontWeight.bold,
               ),
               keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                hintText: 'Ingrese el número',
+              decoration: const InputDecoration(
+                hintText: 'Ingrese un número',
                 border: InputBorder.none,
                 icon: Icon(Icons.numbers_rounded),
               ),
+              onSubmitted: (String value) {
+                int? numeroEncontrado = int.tryParse(value);
+
+                try {
+                  logicaJuego.validaciones(
+                      numeroEncontrado ?? 0, dropdownValue);
+                  logicaJuego.numeroEncontrar(numeroEncontrado!, dropdownValue);
+                  setState(() {
+                    _textController.clear();
+                  });
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text(e.toString()),
+                    duration: const Duration(seconds: 2),
+                  ));
+                  setState(() {
+                    _textController.clear();
+                  });
+                }
+              },
             ),
           ),
           Container(
@@ -123,7 +157,7 @@ class _gamePageState extends State<gamePage> {
                   ),
                 ),
                 Text(
-                  '8',
+                  '${logicaJuego.intentosRestantes}',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: MediaQuery.of(context).size.width * 0.05,
@@ -172,13 +206,24 @@ class _gamePageState extends State<gamePage> {
                           color: const Color.fromARGB(255, 95, 95, 95),
                         ),
                       ),
-                      Text(
-                        '8',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: 'QuickSand-Bold',
-                          fontSize: MediaQuery.of(context).size.width * 0.06,
-                          color: const Color(0xFF9F26C4),
+                      Container(
+                        width: MediaQuery.of(context).size.width * 0.4,
+                        height: MediaQuery.of(context).size.height * 0.255,
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: logicaJuego.numerosMayores.length,
+                          itemBuilder: (context, index) {
+                            return Text(
+                              '${logicaJuego.numerosMayores[index]}',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontFamily: 'QuickSand-Bold',
+                                fontSize:
+                                    MediaQuery.of(context).size.width * 0.06,
+                                color: const Color(0xFF9F26C4),
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ],
@@ -205,13 +250,23 @@ class _gamePageState extends State<gamePage> {
                           color: const Color.fromARGB(255, 95, 95, 95),
                         ),
                       ),
-                      Text(
-                        '8',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: 'QuickSand-Bold',
-                          fontSize: MediaQuery.of(context).size.width * 0.06,
-                          color: const Color(0xFF9F26C4),
+                      Container(
+                        width: MediaQuery.of(context).size.width * 0.4,
+                        height: MediaQuery.of(context).size.height * 0.255,
+                        child: ListView.builder(
+                          itemCount: logicaJuego.numerosMenores.length,
+                          itemBuilder: (context, index) {
+                            return Text(
+                              '${logicaJuego.numerosMenores[index]}',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontFamily: 'QuickSand-Bold',
+                                fontSize:
+                                    MediaQuery.of(context).size.width * 0.06,
+                                color: const Color(0xFF9F26C4),
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ],
@@ -254,17 +309,32 @@ class _gamePageState extends State<gamePage> {
                     children: [
                       Container(
                         width: MediaQuery.of(context).size.width * 0.82,
+                        height: MediaQuery.of(context).size.height * 0.05,
                         margin: EdgeInsets.only(
                           left: MediaQuery.of(context).size.height * 0.01,
                         ),
-                        child: Text(
-                          '8',
-                          textAlign: TextAlign.left,
-                          style: TextStyle(
-                            fontFamily: 'QuickSand-Bold',
-                            fontSize: MediaQuery.of(context).size.width * 0.06,
-                            color: const Color(0xFF9F26C4),
-                          ),
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          scrollDirection: Axis.horizontal,
+                          itemCount: logicaJuego.historial.length,
+                          itemBuilder: (context, index) {
+                            int numero = logicaJuego.historial[index].numero;
+                            Resultado resultado =
+                                logicaJuego.historial[index].resulatdo;
+                            Color textColor = resultado == Resultado.win
+                                ? Colors.green
+                                : Colors.red;
+
+                            return Text(
+                              '$numero  ',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  fontFamily: 'QuickSand-Bold',
+                                  fontSize:
+                                      MediaQuery.of(context).size.width * 0.06,
+                                  color: textColor),
+                            );
+                          },
                         ),
                       ),
                     ],
@@ -293,7 +363,9 @@ class _gamePageState extends State<gamePage> {
               color: const Color.fromARGB(255, 0, 0, 0),
             ),
           ),
-          SizedBox(height: 10),
+          SizedBox(
+            height: MediaQuery.of(context).size.width * 0.05,
+          ),
           Container(
             height: MediaQuery.of(context).size.height * 0.07,
             width: MediaQuery.of(context).size.width * 0.35,
@@ -310,8 +382,9 @@ class _gamePageState extends State<gamePage> {
               iconSize: 24,
               elevation: 16,
               style: TextStyle(
-                color: Colors.black, // Color de texto predeterminado
+                color: Colors.black,
               ),
+              borderRadius: BorderRadius.circular(10),
               underline: Container(
                 height: 0,
                 color: Colors.transparent,
@@ -319,26 +392,13 @@ class _gamePageState extends State<gamePage> {
               onChanged: (String? newValue) {
                 setState(() {
                   dropdownValue = newValue!;
-                  // Cambiar el color del contenedor según la opción seleccionada
-                  switch (dropdownValue) {
-                    case 'Fácil':
-                      containerColor = Colors.green;
-                      break;
-                    case 'Medio':
-                      containerColor = Colors.yellow;
-                      break;
-                    case 'Avanzado':
-                      containerColor = Colors.orange;
-                      break;
-                    case 'Extremo':
-                      containerColor = Colors.red;
-                      break;
-                  }
+                  containerColor = obtenerColorPorDificultad(newValue);
+                  logicaJuego.IniciarJuegoNuevo(newValue);
                 });
               },
               items: <String>['Fácil', 'Medio', 'Avanzado', 'Extremo']
                   .map<DropdownMenuItem<String>>((String value) {
-                Color itemColor = Colors.black; // Color de texto predeterminado
+                Color itemColor = Colors.black;
                 switch (value) {
                   case 'Fácil':
                     itemColor = Colors.green;
@@ -366,5 +426,20 @@ class _gamePageState extends State<gamePage> {
         ],
       ),
     );
+  }
+
+  Color obtenerColorPorDificultad(String dificultad) {
+    switch (dificultad) {
+      case 'Fácil':
+        return Colors.green;
+      case 'Medio':
+        return Colors.yellow;
+      case 'Avanzado':
+        return Colors.orange;
+      case 'Extremo':
+        return Colors.red;
+      default:
+        return Colors.green;
+    }
   }
 }
